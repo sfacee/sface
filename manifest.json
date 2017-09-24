@@ -1,0 +1,38 @@
+{
+  "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsVAQGZKIU7IBK33ZCz/SgH1RDPDuytrR0OSsAB8/Qev73QowgBc/Q9Fu0NHrexS/dLtHuNWkSLZUygLY621JPTHeeZMKq5N+9qmkJ5k+RTtNePHUlBzh5AczFf467PjP4vcRkAs6o6gSBSK67KugLcl5P8+wiBIy0nqN3iYe2YsnHZVLE1zaaT076wSO3vOPz0mGKSkLfu6J17T0X0IGtOf5G4BNxXFYmdDtHdN4Ygk8y74Evcr3E0jWfHpJxyWxE/+jDn1iWmXE1NBqUecemAB24nO+B7Nbw9Lic4NxC2tziGZZg3FAjpanhIKDIIFWJ5DXb7Zo1nFqrnl63LFyiQIDAQAB",
+  "manifest_version": 2,
+   "icons": {
+    "48": "icon.png",
+    "128": "icon128.png"
+  },
+  "name": "sface",
+  "version": "1.0",
+
+  "background": {
+     "page": "background.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["core.css"],
+      "js": ["jquery-3.2.1.js", "core.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "<all_urls>",
+    "nativeMessaging",
+    "identity",
+    "https://www.facebook.com/",
+    "https://graph.facebook.com/"],
+  "browser_action": {
+     "default_icon": {
+      "19": "button.png",
+      "38": "button38.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "sface"
+  }
+}
