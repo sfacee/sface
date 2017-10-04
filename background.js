@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var start_time = new Date().getTime();
 var manifest = chrome.runtime.getManifest();
 var hostName = "com.typedef.sface";
 var port = null;
@@ -27,44 +28,57 @@ chrome.browserAction.setBadgeBackgroundColor({color: '#000'});
 
 // listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(function(id, info, tab) {
-  if (tab.url.toLowerCase().indexOf("facebook.com") > -1) {
+	if (info.status === 'complete') {
+		// if(!init){
+		// 	chrome.tabs.getSelected(null, function(tab) {
+		// 		chrome.tabs.sendMessage(tab.id, {action:"init"});
+		// 		init = true;
+		// 	});
+		// }
+	}
+  	if (tab.url.toLowerCase().indexOf("facebook.com") > -1) {
     // chrome.pageAction.show(tab.id);
-  }
+  	}
 });
+
+//show message when closing a tab
+chrome.tabs.onRemoved.addListener(function(tabid, removed) {
+ alert("tab closed");
+})
+//show message when closing a windows
+chrome.windows.onRemoved.addListener(function(windowid) {
+ alert("window closed");
+})
+
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 	if(request.action != null){
-		if(request.action == "fb"){
-			var msg = {
-				"id":request.action,
-				"string":request.text,
-			};
-		}else if (request.action == "scroll") {
+		if(request.action == "time"){
+			timestamp();
+		} else if (request.action == "scroll") {
 			var cursor = JSON.parse(request.cursor);
 			var msg = {
 				"id":request.action,
 				"array":[cursor.scroll,cursor.delta],
 				"string":(cursor.delta>0)?"scroll up":"scroll down",
 			};
-
-		} else if (request.action == "mouse") {
+		} else if (request.action == "click") {
 			var cursor = JSON.parse(request.cursor);
 			var msg = {
 				"id":request.action,
-				"int":cursor.down,
-				"float":cursor.scroll,
-				"array":[cursor.x,cursor.y],
 				"string":cursor.elm
 			};
-		}
-		else if (request.action == "keyboard") {
-			var keys = JSON.parse(request.keys);
+		} else if(request.action == "comment"){
+			var comment = JSON.parse(request.comment);
 			var msg = {
 				"id":request.action,
-				"int":keys.down,
-				"strings":keys.keys,
-				"string":keys.down?"key down":"key up"
+				"int":comment.commentLength
+			};
+		} else if(request.action == "notification"){
+			var msg = {
+				"id":request.action,
+				"string":request.text,
 			};
 		}
 		sendMessageHost(msg);
@@ -84,7 +98,6 @@ function sendMessageHost(msg){
 }
 
 function onWindowLoad() {
-	//connect();
 	var msg = {
 		"id":"status",
 		"string":" sface v"+manifest.version+ " started!"
@@ -92,4 +105,13 @@ function onWindowLoad() {
 	sendMessageHost(msg);
 }
 
+//send start time to content.js
+function timestamp(){
+	chrome.tabs.getSelected(null, function(tab) {
+  		chrome.tabs.sendMessage(tab.id, {time: start_time});
+	});
+}
+//var int=self.setInterval(function(){timestamp()},6000);
+
 window.onload = onWindowLoad;
+

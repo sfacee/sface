@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var time;
 
 function getCoords(elem) { // crossbrowser version
     var box = elem.getBoundingClientRect();
@@ -35,17 +36,16 @@ function getCoords(elem) { // crossbrowser version
 
 var mouse = { x:0, y:0, down:0 , elm:'', scroll:0, delta:0};
 var keyboard = { keys:[], down:0};
-// var rect = document.body.getBoundingClientRect();
+var comment = { commentLength:0 };
+var typeBox;
 var target = document.body;
 var rect = getCoords(target);
-var rectLeft = 0;//rect.left;
-var rectTop = 0;//rect.top;
-// var cssScaleX = rect.width / rect.offsetWidth;
-// var cssScaleY = rect.height / rect.offsetHeight;
+var rectLeft = 0;
+var rectTop = 0;
 
 function handleMouseEvent(e){
-    mouse.x = (e.clientX - rectLeft) ;//* cssScaleX;
-    mouse.y = (e.clientY - rectTop) ;//* cssScaleY;
+    mouse.x = (e.clientX - rectLeft);
+    mouse.y = (e.clientY - rectTop);
 }
 
 if (document.addEventListener){
@@ -53,9 +53,8 @@ if (document.addEventListener){
     document.addEventListener("mousewheel", MouseWheelHandler, false);
     // Firefox
     document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
-}
-// IE 6/7/8
-else{
+} else{
+    // IE 6/7/8
     document.attachEvent("onmousewheel", MouseWheelHandler);
 }
 
@@ -74,56 +73,130 @@ function MouseWheelHandler(e){
 }
 
 function HandleKeyboardEvent(e){
-  if (e.code == 'KeyZ' && (e.ctrlKey || e.metaKey)) {
-    console.log('Undo!')
-    keyboard.keys = [e.key,(e.ctrlKey || e.metaKey)];
-  }
-  if (e.code == 'KeyX' && (e.ctrlKey || e.metaKey)) {
-    console.log('Copy!')
-    keyboard.keys = [e.key,(e.ctrlKey.key || e.metaKey.key)];
-  }
-  if (e.code == 'KeyV' && (e.ctrlKey || e.metaKey)) {
-    console.log('Paste!')
-    keyboard.keys = [e.key,(e.ctrlKey.key || e.metaKey.key)];
-  }else{
     keyboard.keys = [e.key];
-  }
-  console.log(e.key);
 }
 
 document.addEventListener('mousedown', function (e) {
-    var e=e||window.event;
-    var target=e.target||e.srcElement;
+    var e = e||window.event;
+    var target = e.target||e.srcElement;
     mouse.down = 1;
     //fix to print class name
-    mouse.elm = target.nodeName + ' ' + target.id + ' ' + target.classList[0];
-    handleMouseEvent(e);
-    chrome.runtime.sendMessage({action:"mouse",cursor:JSON.stringify(mouse)});
+    if(target !== undefined){
+        mouse.elm = clickDispatcher(target);
+        if(mouse.elm != null){
+
+            typeBox = (mouse.elm.indexOf("WRITING_") !== -1) ? target : null;
+            handleMouseEvent(e);
+            chrome.runtime.sendMessage({action:"click",cursor:JSON.stringify(mouse)});
+        }
+    }
 });
 
-document.addEventListener('mouseup', function (e) {
-    mouse.down = 0;
-    handleMouseEvent(e);
-    chrome.runtime.sendMessage({action:"mouse",cursor:JSON.stringify(mouse)});
-});
+// document.addEventListener('mouseout', function (e) {
+//     mouse.down = 0;
+//     handleMouseEvent(e);
+// });
 
-document.addEventListener('mouseout', function (e) {
-    mouse.down = 0;
+document.addEventListener('mousemove',  function (e){
+    var e = e||window.event;
+    var target = e.target||e.srcElement;
+    console.log(document.body);
     handleMouseEvent(e);
 });
-
-document.addEventListener('mousemove',  handleMouseEvent );
 
 //keyboard
 
 document.addEventListener('keydown', function(e) {
-    keyboard.down = 1;
     HandleKeyboardEvent(e);
-    chrome.runtime.sendMessage({action:"keyboard",keys:JSON.stringify(keyboard)});
+    if (keyboard.keys == "Enter" && typeBox != null) {
+        comment.commentLength = typeBox.textContent.length;
+        chrome.runtime.sendMessage({action:"comment",comment:JSON.stringify(comment)});
+    }
 });
 
-document.addEventListener('keyup', function(e) {
-    keyboard.down = 0;
-    HandleKeyboardEvent(e);
-    chrome.runtime.sendMessage({action:"keyboard",keys:JSON.stringify(keyboard)});
+function sendNative(addr,msg){
+    chrome.runtime.sendMessage({action:addr,text:msg});
+}
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+function onInit() { 
+
+   var observer_friend_request = new MutationObserver(function(mutations, observer_friend_request) {
+      sendNative("notification","new friend");
+    });
+
+    var observer_message_request = new MutationObserver(function(mutations, observer_message_request) {
+      sendNative("notification","new message");
+    });
+
+    var observer_notification_request = new MutationObserver(function(mutations, observer_notification_request) {
+        mutations.forEach(function(mut) {
+
+        });
+        sendNative("notification","new notifications");
+    });
+
+    var observe_notification_popup = new MutationObserver(function(mutations,observe_notification_popup){
+        //sendNative("notification","new pop up");
+        mutations.forEach(function(mut) {
+            console.log(mut.target);
+        });
+    });
+
+    var config_pop = {
+        childList: true,
+        subtree:true,
+        characterData:false,
+        attributes:true
+        //attributeOldValue: true
+    }
+
+
+    var config = {
+        childList: true,
+        subtree:true,
+        characterData:true,
+        attributes:true,
+        attributeOldValue: true
+    };
+    
+    var friend = $("#requestsCountValue");
+    var message = $("#mercurymessagesCountValue");
+    var notification = $("#notificationsCountValue");
+    var notification_popup = $("#u_0_43"); // notification popup
+
+    try{
+        observer_friend_request.observe(friend[0],config);
+        observer_message_request.observe(message[0],config);
+        observer_notification_request.observe(notification[0],config);
+        observe_notification_popup.observe(notification_popup[0],config_pop);
+    }catch (e) {
+
+    }
+
+    sendNative("time","");//sync between backgroud and content
+}
+
+//listen from background messages
+chrome.runtime.onMessage.addListener(function(request, sender) {
+    //console.log(request.time);
+    var end = new Date().getTime();
+    time = end - request.time;
+    console.log('Execution time: ' + time);
 });
+
+
+//show message when closing a tab 
+$(window).on('beforeunload', function() {
+    var x =logout();
+    return x;
+});
+function logout(){
+        jQuery.ajax({
+        });
+        return null;
+}
+
+onInit();
+

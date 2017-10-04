@@ -21,11 +21,12 @@
 //n = NetAddr("127.0.0.1",57120);
 (
 n = nil;
-f = { |t, r, msg| msg.postln };
+f = { |t, r, msg| msg.postln;  };
 d = OSCresponderNode(n, '/status',f).add;
-m = OSCresponderNode(n, '/mouse',f).add;
+d = OSCresponderNode(n, '/notification',f).add;
+m = OSCresponderNode(n, '/click',f ).add;
 c = OSCresponderNode(n, '/scroll',f).add;
-k = OSCresponderNode(n, '/keyboard',f).add;
-u = OSCresponderNode(n, '/fb',f).add;
+k = OSCresponderNode(n, '/comment',f).add;
 )
+
 

@@ -9,14 +9,16 @@
   "version": "1.0",
 
   "background": {
-     "page": "background.html"
+     // "page": "background.html"
+      "scripts": ["background.js"],
+      "persistent": false
   },
   "content_scripts": [
     {
+      "run_at": "document_end",
       "matches": ["<all_urls>"],
       "css": ["core.css"],
-      "js": ["jquery-3.2.1.js", "core.js"],
-      "run_at": "document_end",
+      "js": ["jquery-3.2.1.js", "sface.js", "core.js"],
       "all_frames": true
     }
   ],
