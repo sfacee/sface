@@ -84,10 +84,13 @@ document.addEventListener('mousedown', function (e) {
     if(target !== undefined){
         mouse.elm = clickDispatcher(target);
         if(mouse.elm != null){
-
-            typeBox = (mouse.elm.indexOf("WRITING_") !== -1) ? target : null;
-            handleMouseEvent(e);
-            chrome.runtime.sendMessage({action:"click",cursor:JSON.stringify(mouse)});
+            if(mouse.elm == "POST"){
+                sendComment();
+            }else{
+                typeBox = (mouse.elm.indexOf("WRITING_") !== -1) ? target : null;
+                handleMouseEvent(e);
+                chrome.runtime.sendMessage({action:"click",cursor:JSON.stringify(mouse)});
+            }
         }
     }
 });
@@ -97,21 +100,27 @@ document.addEventListener('mousedown', function (e) {
 //     handleMouseEvent(e);
 // });
 
-document.addEventListener('mousemove',  function (e){
-    var e = e||window.event;
-    var target = e.target||e.srcElement;
-    console.log(document.body);
-    handleMouseEvent(e);
-});
+// document.addEventListener('mousemove',  function (e){
+//     var e = e||window.event;
+//     var target = e.target||e.srcElement;
+//     console.log(document.body);
+//     handleMouseEvent(e);
+// });
 
 //keyboard
 
+function sendComment(){
+    if(typeBox != null) {
+        comment.commentLength = typeBox.textContent.length;
+        if(comment.commentLength > 0)
+            chrome.runtime.sendMessage({action:"comment",comment:JSON.stringify(comment)});
+    }
+}
+
 document.addEventListener('keydown', function(e) {
     HandleKeyboardEvent(e);
-    if (keyboard.keys == "Enter" && typeBox != null) {
-        comment.commentLength = typeBox.textContent.length;
-        chrome.runtime.sendMessage({action:"comment",comment:JSON.stringify(comment)});
-    }
+    if (keyboard.keys == "Enter")
+        sendComment();
 });
 
 function sendNative(addr,msg){
@@ -130,12 +139,12 @@ function onInit() {
       sendNative("notification","new message");
     });
 
-    var observer_notification_request = new MutationObserver(function(mutations, observer_notification_request) {
-        mutations.forEach(function(mut) {
+    // var observer_notification_request = new MutationObserver(function(mutations, observer_notification_request) {
+    //     mutations.forEach(function(mut) {
 
-        });
-        sendNative("notification","new notifications");
-    });
+    //     });
+    //     sendNative("notification","new notifications");
+    // });
 
     var observe_notification_popup = new MutationObserver(function(mutations,observe_notification_popup){
         //sendNative("notification","new pop up");
@@ -163,15 +172,15 @@ function onInit() {
     
     var friend = $("#requestsCountValue");
     var message = $("#mercurymessagesCountValue");
-    var notification = $("#notificationsCountValue");
+    //var notification = $("#notificationsCountValue");
     var notification_popup = $("#u_0_43"); // notification popup
 
     try{
         observer_friend_request.observe(friend[0],config);
         observer_message_request.observe(message[0],config);
-        observer_notification_request.observe(notification[0],config);
+        //observer_notification_request.observe(notification[0],config);
         observe_notification_popup.observe(notification_popup[0],config_pop);
-    }catch (e) {
+    }catch(e){
 
     }
 
@@ -188,15 +197,15 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 
 //show message when closing a tab 
-$(window).on('beforeunload', function() {
-    var x =logout();
-    return x;
-});
-function logout(){
-        jQuery.ajax({
-        });
-        return null;
-}
+// $(window).on('beforeunload', function() {
+//     var x =logout();
+//     return x;
+// });
+// function logout(){
+//         jQuery.ajax({
+//         });
+//         return null;
+// }
 
 onInit();
 

@@ -22,33 +22,82 @@ var start_time = new Date().getTime();
 var manifest = chrome.runtime.getManifest();
 var hostName = "com.typedef.sface";
 var port = null;
+var defaultUrl = "https://www.facebook.com";
+var debugUrl = "chrome://extensions";
+var debug = false;
+var redirect = debug ? false : true;//redirect to facebook
 
 chrome.browserAction.setBadgeText({text: 'sface'});
 chrome.browserAction.setBadgeBackgroundColor({color: '#000'});
 
+var activeTabId;
+
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+  activeTabId = activeInfo.tabId;
+  chrome.tabs.get(activeTabId, function (tab) {
+        if (tab) {
+        	if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
+				//facebook
+  			}else{
+  				//uncomment to force selection of a facebook tab
+  				//getFacebookTabs();
+  			}
+        }
+    });
+});
+
+function getFacebookTabs(){
+	chrome.tabs.getAllInWindow(null, function(tabs){
+    	for (var i = 0; i < tabs.length; i++) {
+    		if(tabs[i].url.toLowerCase().indexOf("facebook.com") != -1){
+  				chrome.tabs.update(tabs[i].id, {active: true});
+  				return;
+  			}
+    	}
+    	//chrome.tabs.create({ url: defaultUrl });
+    	//else select first tab
+    	//chrome.tabs.update(tabs[0].id, {active: true});
+	});
+}
+
 // listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 	if (info.status === 'complete') {
-		// if(!init){
 		// 	chrome.tabs.getSelected(null, function(tab) {
-		// 		chrome.tabs.sendMessage(tab.id, {action:"init"});
-		// 		init = true;
 		// 	});
-		// }
+		if(redirect){
+			if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
+			//facebook
+		  	}else{
+		  		//redirect to facebook
+		  		chrome.tabs.update(tab.id, {url:defaultUrl, active: true});
+		  	}
+	  	}
 	}
-  	if (tab.url.toLowerCase().indexOf("facebook.com") > -1) {
-    // chrome.pageAction.show(tab.id);
-  	}
 });
 
-//show message when closing a tab
+
 chrome.tabs.onRemoved.addListener(function(tabid, removed) {
- alert("tab closed");
-})
-//show message when closing a windows
+	if(redirect){
+		var tabCount = 0;
+		chrome.tabs.getAllInWindow(null, function(tabs){
+			tabCount = tabs.length;
+		});
+		if(tabCount)
+		chrome.tabs.create({ url: defaultUrl });
+	}
+});
+
 chrome.windows.onRemoved.addListener(function(windowid) {
- alert("window closed");
-})
+	//open new window 
+ 	chrome.windows.create({url: defaultUrl, type: "normal"});
+ 	if(debug)
+		chrome.tabs.create({ url: debugUrl });
+});
+
+chrome.windows.onCreated.addListener(function(windowid) {
+ 	//chrome.windows.remove(windowid);
+});
 
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {

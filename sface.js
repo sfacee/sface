@@ -12,29 +12,27 @@ HTML_NODE.prototype.is = function(target){
 }
 
 function clb_LIKE(target){
-	if(target.getAttribute("aria-pressed"))
-		return "UNLIKE";
-	return "LIKE";
+	if( target.getAttribute("aria-pressed") == "true")
+		return "Unlike";
+	else
+		return "Like";
 }
 function clb_REACTION(target){
-	return "REACTION_" + target.textContent;
+	return target.textContent;
 }
 function clb_VIDEO(target){
 	return "VIDEO";
 }
 function clb_STATUS(target){
-	return "STATUS";
+	return "WRITING_POST";
 }
 function clb_WRITING(target){
-	if(target.offsetParent.className == "_5rpb"){
+	if (target.clientHeight == 16)
 		return "WRITING_MSG";
-	}else if (target.offsetParent.className == "_3nd0"){
+	else if(target.clientHeight == 18)
 		return "WRITING_COMMENT";
-	}
-	// if(target.getAttribute("data-offset-key")[0].nodeValue == "4k1sp-0-0")//msg
-	// 	return "WRITING_MSG";
-	// else if(target.getAttribute("data-offset-key")[0].nodeValue == "4ec1p-0-0")//comment
-	// 	return "WRITING_COMMENT";
+	else if (target.clientHeight == 28)
+		return "WRITING_POST";
 }
 function clb_APPROVE(target){
 	return "APPROVE";
@@ -43,13 +41,15 @@ function clb_DELETE(target){
 	return "DELETE";
 }
 function clb_POST(target){
-if(target.textContent == "Post")
-	return "POST";
+	if(target.textContent == "Post")
+		return "POST";
+	else
+		return null;
 }
 
 var LIKE_CLICK = [new HTML_NODE("A","UFILikeLink",clb_LIKE)];
 var REACTION_CLICK = [new HTML_NODE("DIV","_39n",clb_REACTION)];
-var STATUS_CLICK = [
+var POST_CLICK = [
 	new HTML_NODE("TEXTAREA","_4h98",clb_STATUS),
 	new HTML_NODE("TEXTAREA","_3en1",clb_STATUS),
 	];
@@ -77,7 +77,7 @@ var YTP_CLICK = [
 var ACTIVITIES = [
 	LIKE_CLICK,
 	REACTION_CLICK,
-	STATUS_CLICK,
+	POST_CLICK,
 	VIDEO_CLICK,
 	YTP_CLICK,
 	WRITING_CLICK,
@@ -91,7 +91,6 @@ function clickDispatcher(target){
 			if(ACTIVITIES[i][j].is(target))
 				return ACTIVITIES[i][j].callback_(target);
 
-	clb_POST(target);
-	return null;
+	return clb_POST(target);
 }
 
