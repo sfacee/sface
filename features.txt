@@ -1,0 +1,41 @@
+Features:
+(sorted more or less by priority)
+
+- Utility 
+--- I think there could be a more logical way to parse the osc messages. For example, when user clicks something the first message should be what he clicked, not the XY of the mouse. When the user comment on something or write a text maybe the keyword should be "text" or "comment" rather than "keyboard" and the only parameter we need to send at the moment is the final length of the string.
+
+
+- Activity analysis
+--- reactions (like / happy / sad / ...) - Check!
+--- post (if he made a new status update)
+--- Comments: I disabled key logger. What we need is to only send the length of the string when the user finishes typing 		and press enter. I'm sure there is a way to take it from the HTML without logging every keyboard stroke. 
+	I did an attempt to save the location of the text box when user clicks on it and then output its length when user press enter. it works in some of the cases but not in all of them. I'm sure there is a better way...
+
+--- play/stop a video 
+--- is he typing in a private message or in a post / newsfeed item
+--- did he approve a new friend request or added a new friend
+
+
+- Notifications
+--- if he got a reaction (like / happy / sad / ...)
+--- if he got a comment / comment replay to something that he posted 
+--- new friend request
+--- new incoming message
+
+
+- Security and fool proof
+--- there should be a password protected "on / off" switch to sface (without going to chrome://extensions)
+--- while sface is on it should be impossible to quite chrome, switch application or exit full screen mode
+--- while sface is on any attempt to browse to a webpage other than fb should redirect to facebook.com
+(of course if someone is really determined to fuck up the thing they will succeed but if we can try and make it a bit harder its already good)
+
+
+- Glitching Facebook (last priority)
+--- Visually distort whatever the user touched 
+--- over time gradually blur the content, leaving just the option to react while the object is ambiguous / unknown
+--- gradually mess up the user's reactions 
+------- change characters to upper / lower case and then to something else
+------- change likes to happy / sad and vice versa...
+
+
+- Android version (in the future...)
