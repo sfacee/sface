@@ -46,7 +46,14 @@ function clb_POST(target){
 	else
 		return null;
 }
+function clb_HOME(target){
+	return "HOME";
+}
 
+var HOME_CLICK = [
+	new HTML_NODE("A","_2s25",clb_HOME),
+	new HTML_NODE("SPAN","_2md",clb_HOME)
+	];
 var LIKE_CLICK = [new HTML_NODE("A","UFILikeLink",clb_LIKE)];
 var REACTION_CLICK = [new HTML_NODE("DIV","_39n",clb_REACTION)];
 var POST_CLICK = [
@@ -75,6 +82,7 @@ var YTP_CLICK = [
 ];
 
 var ACTIVITIES = [
+	HOME_CLICK,
 	LIKE_CLICK,
 	REACTION_CLICK,
 	POST_CLICK,
