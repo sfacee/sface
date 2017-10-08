@@ -19,6 +19,8 @@
 // SOFTWARE.
 
 var time;
+var first_notify = false;
+var second_notify = false;
 
 function getCoords(elem) { // crossbrowser version
     var box = elem.getBoundingClientRect();
@@ -139,28 +141,15 @@ function onInit() {
       sendNative("notification","new message");
     });
 
-    // var observer_notification_request = new MutationObserver(function(mutations, observer_notification_request) {
-    //     mutations.forEach(function(mut) {
+    var observer_notification_request = new MutationObserver(function(mutations, observer_notification_request) {
+        if(!first_notify)
+            first_notify = true;
+        if(first_notify && !second_notify){
+            second_notify = true;
+            observerNotify();
+        }
 
-    //     });
-    //     sendNative("notification","new notifications");
-    // });
-
-    var observe_notification_popup = new MutationObserver(function(mutations,observe_notification_popup){
-        //sendNative("notification","new pop up");
-        mutations.forEach(function(mut) {
-            console.log(mut.target);
-        });
     });
-
-    var config_pop = {
-        childList: true,
-        subtree:true,
-        characterData:false,
-        attributes:true
-        //attributeOldValue: true
-    }
-
 
     var config = {
         childList: true,
@@ -172,19 +161,46 @@ function onInit() {
     
     var friend = $("#requestsCountValue");
     var message = $("#mercurymessagesCountValue");
-    //var notification = $("#notificationsCountValue");
-    var notification_popup = $("#u_0_43"); // notification popup
+    var notification = $("#notificationsCountValue");
+    //var notification_popup = $("._50d1");//$("#u_0_4b"); // notification popup _50d1
 
     try{
         observer_friend_request.observe(friend[0],config);
         observer_message_request.observe(message[0],config);
-        //observer_notification_request.observe(notification[0],config);
-        observe_notification_popup.observe(notification_popup[0],config_pop);
+        observer_notification_request.observe(notification[0],config);
     }catch(e){
+    }
+        
+    sendNative("time","");//sync between backgroud and content
+}
 
+function observerNotify(){
+
+    var config_pop = {
+        childList: true,
+        subtree:true,
+        characterData:true,
+        attributes:true
+        //attributeOldValue: true
     }
 
-    sendNative("time","");//sync between backgroud and content
+    var observe_notification_popup = new MutationObserver(function(mutations,observe_notification_popup){
+        //sendNative("notification","new pop up");
+        mutations.forEach(function(mut) {
+            if(mut.type == "childList")
+                if(mut.addedNodes.length > 0){
+                    var no = JSON.parse(mut.addedNodes[0].dataset.gt);
+                    sendNative("notification",no.notif_type);
+                }
+        });
+    });
+    
+    var notification_popup = $("._50d1");//$("#u_0_4b"); // notification popup _50d1
+
+    try{
+        observe_notification_popup.observe(notification_popup[0],config_pop);
+    }catch(e){
+    }
 }
 
 //listen from background messages
@@ -207,5 +223,9 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 //         return null;
 // }
 
-onInit();
+$( document ).ready(function() {
+    //var int=self.setTimeout(function(){onInit()},6000);
+    onInit();
+});
+
 

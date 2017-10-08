@@ -24,7 +24,7 @@ var hostName = "com.typedef.sface";
 var port = null;
 var defaultUrl = "https://www.facebook.com";
 var debugUrl = "chrome://extensions";
-var debug = false;
+var debug = true;
 var redirect = debug ? false : true;//redirect to facebook
 
 chrome.browserAction.setBadgeText({text: 'sface'});
@@ -74,6 +74,7 @@ chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 		  	}
 	  	}
 	}
+	
 });
 
 
