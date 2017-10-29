@@ -36,6 +36,11 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
   activeTabId = activeInfo.tabId;
   chrome.tabs.get(activeTabId, function (tab) {
         if (tab) {
+        	var msg = {
+				"id":"reload",
+				"string":"tab_changed"
+			};
+			sendMessageHost(msg);
         	if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
 				//facebook
   			}else{
@@ -65,6 +70,11 @@ chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 	if (info.status === 'complete') {
 		// 	chrome.tabs.getSelected(null, function(tab) {
 		// 	});
+		var msg = {
+				"id":"reload",
+				"string":"tab_url_changed"
+			};
+			sendMessageHost(msg);
 		if(redirect){
 			if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
 			//facebook
