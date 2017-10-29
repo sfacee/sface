@@ -81,6 +81,7 @@ function HandleKeyboardEvent(e){
 document.addEventListener('mousedown', function (e) {
     var e = e||window.event;
     var target = e.target||e.srcElement;
+    var res = false;
     mouse.down = 1;
     //fix to print class name
     if(target !== undefined){
@@ -96,6 +97,7 @@ document.addEventListener('mousedown', function (e) {
         }
     }
 });
+
 
 // document.addEventListener('mouseout', function (e) {
 //     mouse.down = 0;
