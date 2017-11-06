@@ -123,13 +123,17 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 				"array":[cursor.scroll,cursor.delta],
 				"string":(cursor.delta>0)?"scroll up":"scroll down",
 			};
-		} else if (request.action == "click") {
-			var cursor = JSON.parse(request.cursor);
+		} else if (request.action == "video") {
 			var msg = {
 				"id":request.action,
-				"string":cursor.elm
+				"string":request.data
 			};
-		} else if(request.action == "comment"){
+		} else if (request.action == "reaction") {
+			var msg = {
+				"id":request.action,
+				"string":request.data
+			};
+		} else if(request.action == "post"){
 			var comment = JSON.parse(request.comment);
 			var msg = {
 				"id":request.action,
@@ -138,6 +142,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 		} else if(request.action == "notification"){
 			var msg = {
 				"id":request.action,
+				"string":request.text,
+			};
+		} else if(request.action == "post_opt"){
+			var msg = {
+				"id":"post",
 				"string":request.text,
 			};
 		}
@@ -174,4 +183,5 @@ function timestamp(){
 //var int=self.setInterval(function(){timestamp()},6000);
 
 window.onload = onWindowLoad;
+
 

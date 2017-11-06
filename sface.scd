@@ -24,9 +24,9 @@ n = nil;
 f = { |t, r, msg| msg.postln;  };
 d = OSCresponderNode(n, '/status',f).add;
 d = OSCresponderNode(n, '/notification',f).add;
-m = OSCresponderNode(n, '/click',f ).add;
+m = OSCresponderNode(n, '/video',f ).add;
+m = OSCresponderNode(n, '/reaction',f ).add;
 c = OSCresponderNode(n, '/scroll',f).add;
-k = OSCresponderNode(n, '/comment',f).add;
+k = OSCresponderNode(n, '/post',f).add;
 )
-
 

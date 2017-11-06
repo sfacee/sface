@@ -40,6 +40,7 @@ var mouse = { x:0, y:0, down:0 , elm:'', scroll:0, delta:0};
 var keyboard = { keys:[], down:0};
 var comment = { commentLength:0 };
 var typeBox;
+var oldPost;
 var target = document.body;
 var rect = getCoords(target);
 var rectLeft = 0;
@@ -83,18 +84,9 @@ document.addEventListener('mousedown', function (e) {
     var target = e.target||e.srcElement;
     var res = false;
     mouse.down = 1;
-    //fix to print class name
+    
     if(target !== undefined){
-        mouse.elm = clickDispatcher(target);
-        if(mouse.elm != null){
-            if(mouse.elm == "POST"){
-                sendComment();
-            }else{
-                typeBox = (mouse.elm.indexOf("WRITING_") !== -1) ? target : null;
-                handleMouseEvent(e);
-                chrome.runtime.sendMessage({action:"click",cursor:JSON.stringify(mouse)});
-            }
-        }
+        sendTobackground(target);
     }
 });
 
@@ -116,15 +108,21 @@ document.addEventListener('mousedown', function (e) {
 function sendComment(){
     if(typeBox != null) {
         comment.commentLength = typeBox.textContent.length;
-        if(comment.commentLength > 0)
-            chrome.runtime.sendMessage({action:"comment",comment:JSON.stringify(comment)});
+        if(comment.commentLength > 0){
+            chrome.runtime.sendMessage({action:"post",comment:JSON.stringify(comment)});
+            typeBox = null;
+        }
+    }else{// if press post without writing
+            chrome.runtime.sendMessage({action:"post_opt",text:"post_click"});
     }
 }
 
 document.addEventListener('keydown', function(e) {
     HandleKeyboardEvent(e);
-    if (keyboard.keys == "Enter")
+    if (keyboard.keys == "Enter"){
+        checkCommentInputAgain(oldPost);
         sendComment();
+    }
 });
 
 function sendNative(addr,msg){
@@ -225,7 +223,37 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 //         return null;
 // }
 
+function setNotificationCallback(callback) {
+
+    const OldNotify = window.Notification;
+    const newNotify = (title, opt) => {
+        callback(title, opt);
+        return new OldNotify(title, opt);
+    };
+    newNotify.requestPermission = OldNotify.requestPermission.bind(OldNotify);
+    Object.defineProperty(newNotify, 'permission', {
+        get: () => {
+            return OldNotify.permission;
+        }
+    });
+
+    window.Notification = newNotify;
+}
+
+setNotificationCallback((title, opt) => {
+    console.log(title);
+  //ipcRenderer.send('notification', title, opt);
+});
+
 $( document ).ready(function() {
+    // var s = document.createElement("script");
+    // s.src = chrome.extension.getURL("notifhook.js");
+    // document.documentElement.appendChild(s);
+
+
+    // var noticeMe = new Notification(title, options); 
+    // noticeMe.onshow = function() { alert(title) };
+
     //var int=self.setTimeout(function(){onInit()},6000);
     onInit();
 });
