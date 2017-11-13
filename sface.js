@@ -12,11 +12,13 @@ FBK_element.prototype.find = function(e){
 }
 
 var FBK_writing_message = new FBK_element(null,"Type a message...","WRITING_MSG");
-var FBK_writing_comment = new FBK_element(null,"Write a comment...","WRITING_COMMENT")
+var FBK_writing_comment = new FBK_element(null,"Write a comment...","WRITING_COMMENT");
+var FBK_writing_post = new FBK_element(null,"What's on your mind?","WRITING_POST");
 
 var FBK_elements = [
 	FBK_writing_message,
-	FBK_writing_comment
+	FBK_writing_comment,
+	FBK_writing_post
 ];
 
 // recursive check for parent node class
@@ -79,15 +81,19 @@ function clb_VIDEO(target){
 	return "VIDEO";
 }
 function clb_STATUS(target){
+	comment.type = "Post";
 	return "WRITING_POST";
 }
 function clb_WRITING(target){
-	if (target.clientHeight == 16)
+	if (target.clientHeight == 16){
 		return "WRITING_MSG";
-	else if(target.clientHeight == 18 || target.clientHeight == 19)
+	}
+	else if(target.clientHeight == 18 || target.clientHeight == 19){
 		return "WRITING_COMMENT";
-	else if (target.clientHeight == 28)
+	}
+	else if (target.clientHeight == 28){
 		return "WRITING_POST";
+	}
 }
 function clb_COMMENT(target){
 	var e = target.offsetParent.offsetParent;//.offsetParent;//go back to the rootnode of the post
@@ -120,6 +126,7 @@ function checkCommentInput(parent,delay) {
 
 		if(divs.length > 0){
 			typeBox = divs[0];	
+			comment.type = "Comment";
 		}
 
 		oldPost = parent;
@@ -188,7 +195,7 @@ var ACTIVITIES = [
 	SHARE_CLICK,
 	VIDEO_CLICK,
 	YTP_CLICK,
-	WRITING_CLICK, // comment to test new find function
+	//WRITING_CLICK, // comment to test new find function
 	COMMENT_CLICK,
 	APPROVE_REQUEST,
 	DELETE_REQUEST
@@ -224,6 +231,12 @@ function sendTobackground(target){
 	    }else if(res == "VIDEO"){
 	    	chrome.runtime.sendMessage({action:"video",data:"click"});
 	    }else if(res.indexOf("WRITING_") !== -1){
+	    	if(res == "WRITING_MSG")
+	    		comment.type = "Message";
+	    	else if(res == "WRITING_COMMENT")
+	    		comment.type = "Comment";
+	    	else if(res == "WRITING_POST")
+	    		comment.type = "Post";
 	        typeBox = target;
 	    }else{
 	    	typeBox = null;
