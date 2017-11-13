@@ -177,16 +177,22 @@ function onInit() {
 
 function getReaction(src){
     var reaction = null;
+    console.log(src);
     if(src != null){
-        if(src == "https://www.facebook.com/rsrc.php/v3/ys/r/9lG0tO7RUGG.png"){//LOVE
+        if(src == "https://www.facebook.com/rsrc.php/v3/ys/r/9lG0tO7RUGG.png" || 
+        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yJ/r/QXtAA0WPYtT.png"){//LOVE
             reaction = "Love";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/y5/r/0dP3velHfPX.png"){//HAHA
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/y5/r/0dP3velHfPX.png" ||
+            src == "https://static.xx.fbcdn.net/rsrc.php/v3/yr/r/ozGmVmgLlVc.png"){//HAHA
             reaction = "Haha";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/yb/r/dkurclWSh8y.png"){//WOW
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/yb/r/dkurclWSh8y.png" || 
+        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yv/r/KVSREcFC-ZN.png"){//WOW
             reaction = "Wow";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/yp/r/-B-OrH3Adm6.png"){//SAD
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/yp/r/-B-OrH3Adm6.png" ||
+        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yx/r/WtN7zfyusg2.png"){//SAD
             reaction = "Sad";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/y3/r/lXBcZ_3ci9o.png"){//ANGRY
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/y3/r/lXBcZ_3ci9o.png" ||
+        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yE/r/a_aZhiP7J8a.png"){//ANGRY
             reaction = "Angry";
         }else{
             reaction = "unknown_reaction";
