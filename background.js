@@ -26,6 +26,7 @@ var defaultUrl = "https://www.facebook.com";
 var debugUrl = "chrome://extensions";
 var debug = true;
 var redirect = debug ? false : true;//redirect to facebook
+var firstWindow = false;
 
 chrome.browserAction.setBadgeText({text: 'sface'});
 chrome.browserAction.setBadgeBackgroundColor({color: '#000'});
@@ -89,21 +90,22 @@ chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 
 
 chrome.tabs.onRemoved.addListener(function(tabid, removed) {
-	if(redirect){
-		var tabCount = 0;
-		chrome.tabs.getAllInWindow(null, function(tabs){
-			tabCount = tabs.length;
-		});
-		if(tabCount)
-		chrome.tabs.create({ url: defaultUrl });
-	}
+	// if(redirect){
+	// 	var tabCount = 0;
+	// 	chrome.tabs.getAllInWindow(null, function(tabs){
+	// 		tabCount = tabs.length;
+	// 	});
+	// 	if(tabCount)
+	// 	chrome.tabs.create({ url: defaultUrl });
+	// }
 });
 
 chrome.windows.onRemoved.addListener(function(windowid) {
 	//open new window 
- 	chrome.windows.create({url: defaultUrl, type: "normal"});
- 	if(debug)
-		chrome.tabs.create({ url: debugUrl });
+	//commented for debug...
+ 	// chrome.windows.create({url: defaultUrl, type: "normal"});
+ 	// if(debug)
+		// chrome.tabs.create({ url: debugUrl });
 });
 
 chrome.windows.onCreated.addListener(function(windowid) {
@@ -123,21 +125,32 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 				"array":[cursor.scroll,cursor.delta],
 				"string":(cursor.delta>0)?"scroll up":"scroll down",
 			};
-		} else if (request.action == "click") {
-			var cursor = JSON.parse(request.cursor);
+		} else if (request.action == "video") {
 			var msg = {
 				"id":request.action,
-				"string":cursor.elm
+				"string":request.data
 			};
-		} else if(request.action == "comment"){
+		} else if (request.action == "reaction") {
+			var msg = {
+				"id":request.action,
+				"string":request.data
+			};
+		} else if(request.action == "post"){
 			var comment = JSON.parse(request.comment);
 			var msg = {
 				"id":request.action,
+				"string":comment.type,
 				"int":comment.commentLength
 			};
 		} else if(request.action == "notification"){
 			var msg = {
 				"id":request.action,
+				"string":request.text,
+			};
+			//checkWindow();// send to core.js the tab id for each opened window
+		} else if(request.action == "post_opt"){
+			var msg = {
+				"id":"post",
 				"string":request.text,
 			};
 		}
@@ -163,6 +176,8 @@ function onWindowLoad() {
 		"string":" sface v"+manifest.version+ " started!"
 	};
 	sendMessageHost(msg);
+	//create a new windows to listen for notification
+	//chrome.windows.create({url: defaultUrl, type: "normal"});
 }
 
 //send start time to content.js
@@ -171,7 +186,20 @@ function timestamp(){
   		chrome.tabs.sendMessage(tab.id, {time: start_time});
 	});
 }
+
+function checkWindow(){
+	chrome.windows.getAll({populate:true},function(windows){
+	  windows.forEach(function(window){
+	    window.tabs.forEach(function(tab){
+	      //collect all of the urls here, I will just log them instead
+	      //console.log(tab.url);
+	      chrome.tabs.sendMessage(tab.id, {tabId: tab.id});
+	    });
+	  });
+	});
+}
 //var int=self.setInterval(function(){timestamp()},6000);
 
 window.onload = onWindowLoad;
+
 

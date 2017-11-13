@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+var tabId;
 var time;
 var first_notify = false;
 var second_notify = false;
@@ -38,8 +39,9 @@ function getCoords(elem) { // crossbrowser version
 
 var mouse = { x:0, y:0, down:0 , elm:'', scroll:0, delta:0};
 var keyboard = { keys:[], down:0};
-var comment = { commentLength:0 };
+var comment = { type:'',commentLength:0 };
 var typeBox;
+var oldPost;
 var target = document.body;
 var rect = getCoords(target);
 var rectLeft = 0;
@@ -83,18 +85,9 @@ document.addEventListener('mousedown', function (e) {
     var target = e.target||e.srcElement;
     var res = false;
     mouse.down = 1;
-    //fix to print class name
+    
     if(target !== undefined){
-        mouse.elm = clickDispatcher(target);
-        if(mouse.elm != null){
-            if(mouse.elm == "POST"){
-                sendComment();
-            }else{
-                typeBox = (mouse.elm.indexOf("WRITING_") !== -1) ? target : null;
-                handleMouseEvent(e);
-                chrome.runtime.sendMessage({action:"click",cursor:JSON.stringify(mouse)});
-            }
-        }
+        sendTobackground(target);
     }
 });
 
@@ -116,15 +109,21 @@ document.addEventListener('mousedown', function (e) {
 function sendComment(){
     if(typeBox != null) {
         comment.commentLength = typeBox.textContent.length;
-        if(comment.commentLength > 0)
-            chrome.runtime.sendMessage({action:"comment",comment:JSON.stringify(comment)});
+        if(comment.commentLength > 0){
+            chrome.runtime.sendMessage({action:"post",comment:JSON.stringify(comment)});
+            typeBox = null;
+        }
+    }else{// if press post without writing
+            chrome.runtime.sendMessage({action:"post_opt",text:"post_click"});
     }
 }
 
 document.addEventListener('keydown', function(e) {
     HandleKeyboardEvent(e);
-    if (keyboard.keys == "Enter")
+    if (keyboard.keys == "Enter"){
+        checkCommentInputAgain(oldPost);
         sendComment();
+    }
 });
 
 function sendNative(addr,msg){
@@ -176,6 +175,27 @@ function onInit() {
     sendNative("time","");//sync between backgroud and content
 }
 
+function getReaction(src){
+    var reaction = null;
+    if(src != null){
+        if(src == "https://www.facebook.com/rsrc.php/v3/ys/r/9lG0tO7RUGG.png"){//LOVE
+            reaction = "Love";
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/y5/r/0dP3velHfPX.png"){//HAHA
+            reaction = "Haha";
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/yb/r/dkurclWSh8y.png"){//WOW
+            reaction = "Wow";
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/yp/r/-B-OrH3Adm6.png"){//SAD
+            reaction = "Sad";
+        }else if(src == "https://www.facebook.com/rsrc.php/v3/y3/r/lXBcZ_3ci9o.png"){//ANGRY
+            reaction = "Angry";
+        }else{
+            reaction = "unknown_reaction";
+        }
+    }else
+        reaction = "unknown_reaction";
+    return reaction;
+}
+
 function observerNotify(){
 
     var config_pop = {
@@ -192,11 +212,19 @@ function observerNotify(){
             if(mut.type == "childList")
                 if(mut.addedNodes.length > 0){
                     var no = JSON.parse(mut.addedNodes[0].dataset.gt);
-                    sendNative("notification",no.notif_type);
+                    if(no.notif_type == "feedback_reaction_generic"){
+                        //check the reaction type by looking at the image
+                        var img = mut.addedNodes[0].getElementsByTagName('img')[1];
+                        var reaction = getReaction(img.src);
+                        console.log(reaction);
+                        sendNative("notification",reaction);
+                    }else{// default notification
+                        sendNative("notification",no.notif_type);
+                    }
                 }
         });
     });
-    
+
     var notification_popup = $("._50d1");//$("#u_0_4b"); // notification popup _50d1
 
     try{
@@ -208,9 +236,14 @@ function observerNotify(){
 //listen from background messages
 chrome.runtime.onMessage.addListener(function(request, sender) {
     //console.log(request.time);
-    var end = new Date().getTime();
-    time = end - request.time;
-    console.log('Execution time: ' + time);
+    if(request.time != null){
+        var end = new Date().getTime();
+        time = end - request.time;
+        console.log('Execution time: ' + time);
+    }else{
+        tabId = request.tabId;
+        console.log('tab id: ' + tabId);
+    }
 });
 
 
@@ -225,9 +258,41 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 //         return null;
 // }
 
+function setNotificationCallback(callback) {
+
+    const OldNotify = window.Notification;
+    const newNotify = (title, opt) => {
+        callback(title, opt);
+        return new OldNotify(title, opt);
+    };
+    newNotify.requestPermission = OldNotify.requestPermission.bind(OldNotify);
+    Object.defineProperty(newNotify, 'permission', {
+        get: () => {
+            return OldNotify.permission;
+        }
+    });
+
+    window.Notification = newNotify;
+}
+
+setNotificationCallback((title, opt) => {
+    console.log(title);
+  //ipcRenderer.send('notification', title, opt);
+});
+
 $( document ).ready(function() {
+    // var s = document.createElement("script");
+    // s.src = chrome.extension.getURL("notifhook.js");
+    // document.documentElement.appendChild(s);
+
+
+    // var noticeMe = new Notification(title, options); 
+    // noticeMe.onshow = function() { alert(title) };
+
     //var int=self.setTimeout(function(){onInit()},6000);
     onInit();
+
+   // var notify_btn = $("._2n_9").click(); // click notification button
 });
 
 
