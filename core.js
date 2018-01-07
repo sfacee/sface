@@ -47,6 +47,11 @@ var rect = getCoords(target);
 var rectLeft = 0;
 var rectTop = 0;
 
+var newsFeed;
+var distance_video = 0;
+var video_queue = [];
+var MOUSE_VISITED_CLASSNAME = 'crx_mouse_visited';
+
 function handleMouseEvent(e){
     mouse.x = (e.clientX - rectLeft);
     mouse.y = (e.clientY - rectTop);
@@ -72,6 +77,23 @@ function MouseWheelHandler(e){
     mouse.scroll = window.pageYOffset;
     mouse.delta = delta;
     chrome.runtime.sendMessage({action:"scroll",cursor:JSON.stringify(mouse)});
+
+    if(video_queue.length > 0){
+        //var below = checkVisible(video_queue[0]);
+        var above = checkVisible(video_queue[0], 800, 'above');
+        if(above){
+            try{
+                var top_video = video_queue.shift();
+                //debug
+                top_video.classList.add(MOUSE_VISITED_CLASSNAME);   
+                top_video.classList.remove(MOUSE_VISITED_CLASSNAME);   
+                top_video.click();
+                //console.log("video click");
+            }catch(e){}
+            return false;
+        }
+    }
+    
 
     return false;
 }
@@ -171,36 +193,255 @@ function onInit() {
         observer_notification_request.observe(notification[0],config);
     }catch(e){
     }
-        
-    sendNative("time","");//sync between backgroud and content
+    
+    observerNewsFeed();
+
+    //sendNative("time","");//sync between backgroud and content
+
 }
+
+
+//Synchronous
+//warning Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience. For more help, check http://xhr.spec.whatwg.org/.
+function getReactionSize(url){
+    var reaction = null;
+    var fileSize = null;
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false); // false = Synchronous
+    http.send(null); 
+    if (http.status === 200) {
+        fileSize = http.getResponseHeader('content-length');
+        //console.log('fileSize = ' + fileSize);
+    }
+
+    if(fileSize != null){
+        switch(+fileSize){//convert to int
+            case 264://16x16
+                     //24x24
+            case 375://32x32
+                     //48x48
+                reaction = "Like";
+            break;
+            case 274://16x16
+            case 339://24x24
+            case 401://32x32
+            case 550://48x48
+                reaction = "Love";
+            break;
+            case 299:
+            case 431:
+            case 514:
+            case 698:
+                reaction = "Haha";
+            break;
+            case 318:
+            case 397:
+            case 513:
+            case 656:
+                reaction = "Wow";
+            break;
+            case 335:
+            case 438:
+            case 542:
+            case 724:
+                reaction = "Sad";
+            break;
+            case 447:
+            case 616:
+            case 782:
+            case 977:
+                reaction = "Angry";
+            break;
+            default:
+                reaction = "unknown_reaction";
+            break;
+        }
+    }else{
+        reaction = "unknown_reaction";
+    }
+
+    return reaction;
+}
+
+
+//Asynchronous version
+// function getFileSizeAS(url)
+// {
+//     var fileSize = '';
+//     var http = new XMLHttpRequest();
+//     http.open('HEAD', url, true); // true = Asynchronous
+//     http.onreadystatechange = function() {
+//         if (this.readyState == this.DONE) {
+//             if (this.status === 200) {
+//                 fileSize = this.getResponseHeader('content-length');
+//                 console.log('fileSize = ' + fileSize);
+         
+//             }
+//         }
+//     };
+//     http.send();
+//     return ();
+// }
+
+
+
+//16x16
+//24x24
+//32x32
+//48x48
+var reaction_type = ["Like","Love","Haha","Wow","Sad","Angry"];
+var reactions_urls = [
+
+["https://www.facebook.com/rsrc.php/v3/yB/r/lDwm6Y_i0v8.png",//like
+"https://www.facebook.com/rsrc.php/v3/ym/r/-gtkr8sn4nQ.png"],
+
+["https://www.facebook.com/rsrc.php/v3/yn/r/Q2ZsBFJIdXg.png",//love
+"https://www.facebook.com/rsrc.php/v3/yD/r/UAmSM9NxtV_.png",
+"https://www.facebook.com/rsrc.php/v3/ys/r/9lG0tO7RUGG.png",
+"https://static.xx.fbcdn.net/rsrc.php/v3/yJ/r/QXtAA0WPYtT.png"],
+
+["https://www.facebook.com/rsrc.php/v3/yX/r/85Fysyalo_E.png",//haha
+"https://www.facebook.com/rsrc.php/v3/yc/r/rHJhwCFSJMW.png",
+"https://www.facebook.com/rsrc.php/v3/y5/r/0dP3velHfPX.png",
+"https://static.xx.fbcdn.net/rsrc.php/v3/yr/r/ozGmVmgLlVc.png"],
+
+["https://www.facebook.com/rsrc.php/v3/yT/r/fhpn7HuBJXG.png",//wow
+"https://www.facebook.com/rsrc.php/v3/yl/r/qnemZTBQQrZ.png",
+"https://www.facebook.com/rsrc.php/v3/yb/r/dkurclWSh8y.png",
+"https://static.xx.fbcdn.net/rsrc.php/v3/yv/r/KVSREcFC-ZN.png"],
+
+["https://www.facebook.com/rsrc.php/v3/yk/r/x-r8xo-ZCcu.png",//sad
+"https://www.facebook.com/rsrc.php/v3/y3/r/KOj_DjHT70P.png",
+"https://www.facebook.com/rsrc.php/v3/yp/r/-B-OrH3Adm6.png",
+"https://static.xx.fbcdn.net/rsrc.php/v3/yx/r/WtN7zfyusg2.png"],
+
+["https://www.facebook.com/rsrc.php/v3/yz/r/XTeRB5Z20Am.png",//angry
+"https://www.facebook.com/rsrc.php/v3/ys/r/OwssFEPLcUW.png",
+"https://www.facebook.com/rsrc.php/v3/y3/r/lXBcZ_3ci9o.png",
+"https://static.xx.fbcdn.net/rsrc.php/v3/yE/r/a_aZhiP7J8a.png"]
+
+];
+
+
+// function getSizess(){
+
+//     for (var i = reactions_urls.length - 1; i >= 0; i--) {
+//             for (var o = reactions_urls[i].length - 1; o >= 0; o--) {
+//                 var reaction = null;
+//                 var fileSize = null;
+//                 var http = new XMLHttpRequest();
+//                 http.open('HEAD', reactions_urls[i][o], false); // false = Synchronous
+//                 http.send(null); 
+//                 if (http.status === 200) {
+//                     fileSize = http.getResponseHeader('content-length');
+//                     console.log(i + ' fileSize = ' + fileSize);
+//                 }
+//             }
+//         };
+
+
+    
+// }
+
+// getSizess();
 
 function getReaction(src){
     var reaction = null;
     console.log(src);
     if(src != null){
-        if(src == "https://www.facebook.com/rsrc.php/v3/ys/r/9lG0tO7RUGG.png" || 
-        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yJ/r/QXtAA0WPYtT.png"){//LOVE
-            reaction = "Love";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/y5/r/0dP3velHfPX.png" ||
-            src == "https://static.xx.fbcdn.net/rsrc.php/v3/yr/r/ozGmVmgLlVc.png"){//HAHA
-            reaction = "Haha";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/yb/r/dkurclWSh8y.png" || 
-        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yv/r/KVSREcFC-ZN.png"){//WOW
-            reaction = "Wow";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/yp/r/-B-OrH3Adm6.png" ||
-        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yx/r/WtN7zfyusg2.png"){//SAD
-            reaction = "Sad";
-        }else if(src == "https://www.facebook.com/rsrc.php/v3/y3/r/lXBcZ_3ci9o.png" ||
-        src == "https://static.xx.fbcdn.net/rsrc.php/v3/yE/r/a_aZhiP7J8a.png"){//ANGRY
-            reaction = "Angry";
-        }else{
-            reaction = "unknown_reaction";
-        }
+        for (var i = reactions_urls.length - 1; i >= 0; i--) {
+            for (var o = reactions_urls[i].length - 1; o >= 0; o--) {
+                if(src == reactions_urls[i][o]){
+                    return reaction_type[i];
+                }else{
+                    //check image size
+                    reaction = getReactionSize(src);
+                    //reaction = "unknown_reaction";
+                }
+            }
+        };
+       
     }else
         reaction = "unknown_reaction";
     return reaction;
 }
+
+
+function observerNewsFeed(){
+     var config_feed = {
+        childList: true,
+        subtree:true,
+        characterData:true,
+        attributes:true
+        //attributeOldValue: true
+    }
+    
+     var observe_newsFeed = new MutationObserver(function(mutations,observe_newsFeed){
+        //sendNative("notification","new pop up");
+        mutations.forEach(function(mut) {
+            if(mut.type == "childList")
+                if(mut.addedNodes.length > 0){
+                    try{
+                        
+                        // var video_frame = mut.addedNodes[0].getElementsByClassName("_1jto")[0];
+                        // if(video_frame){
+                        //      //video_frame.click();
+                             
+                        //      // Add a visited class name to the element. So we can style it.
+                        //      //video_frame.classList.add(MOUSE_VISITED_CLASSNAME);   
+                        //      //console.log("video frame click");
+                        // }      
+
+                        // var videos = document.getElementsByTagName("video");
+                        // if(videos.length > 0){
+                        //    // videos[videos.length -1].muted = false;
+                        // }
+
+                        var unmute = mut.addedNodes[0].querySelector('[data-testid="mute_unmute_control"]');
+                        if (unmute) {
+                            //unmute.click();
+                            video_queue.push(unmute);
+                            //console.log("video found");
+                        }
+                    }catch(e){}
+                }
+        });
+    });
+
+    newsFeed = document.querySelector('[aria-label="News Feed"]');
+
+    try{
+        observe_newsFeed.observe(newsFeed,config_feed);
+    }catch(e){
+    }
+}
+
+
+// function checkVisible(elm) {
+//     if(typeof elm !== "undefined"){
+//       var rect = elm.getBoundingClientRect();
+//       var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+//       return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+//     }else{
+//         return false;
+//     }
+// }
+
+function checkVisible(elm, threshold, mode) {
+      if(typeof elm !== "undefined"){
+          threshold = threshold || 0;
+          mode = mode || 'visible';
+
+          var rect = elm.getBoundingClientRect();
+          var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+          var above = rect.bottom - threshold < 0;
+          var below = rect.top - viewHeight + threshold >= 0;
+
+          return mode === 'above' ? above : (mode === 'below' ? below : !above && !below);
+        }else{
+            return false;
+        }
+    }
 
 function observerNotify(){
 
@@ -285,6 +526,23 @@ setNotificationCallback((title, opt) => {
     console.log(title);
   //ipcRenderer.send('notification', title, opt);
 });
+
+
+function getElementByAttribute(attr, value, root) {
+    root = root || document.body;
+    if(root.hasAttribute(attr) && root.getAttribute(attr) == value) {
+        return root;
+    }
+    var children = root.children, 
+        element;
+    for(var i = children.length; i--; ) {
+        element = getElementByAttribute(attr, value, children[i]);
+        if(element) {
+            return element;
+        }
+    }
+    return null;
+}
 
 $( document ).ready(function() {
     // var s = document.createElement("script");
