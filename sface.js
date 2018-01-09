@@ -168,8 +168,8 @@ var POST_CLICK = [
 	];
 var SHARE_CLICK = [new HTML_NODE("A","share_action_link",clb_SHARE)];
 var WRITING_CLICK = [new HTML_NODE("DIV","_1mf",clb_WRITING)];
-var COMMENT_CLICK = [new HTML_NODE("A","comment_link",clb_COMMENT)]
-var REPLY_CLICK = [new HTML_NODE("A","UFIReplyLink",clb_COMMENT)]
+var COMMENT_CLICK = [new HTML_NODE("A","comment_link",clb_COMMENT)];
+var REPLY_CLICK = [new HTML_NODE("A","UFIReplyLink",clb_COMMENT)];
 var APPROVE_REQUEST = [
 	new HTML_NODE("A","_42ft",clb_APPROVE),
 	new HTML_NODE("SPAN","_2vhc",clb_APPROVE)
