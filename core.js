@@ -89,7 +89,7 @@ function MouseWheelHandler(e){
   
     if(video_queue.length > 0){
 
-        var above = checkVisible(video_queue[0], Math.round(window.innerHeight/1.5), 'above');
+        var above = checkVisible(video_queue[0], Math.round(window.innerHeight/1.1), 'above');
         if(above && !busy){
             try{
 
@@ -98,6 +98,7 @@ function MouseWheelHandler(e){
                 console.log(video_queue);
                 //top_video.classList.add(MOUSE_VISITED_CLASSNAME);   
                 top_video.click();
+                chrome.runtime.sendMessage({action:"video",data:"click"});
                 
             }catch(e){}
         }
@@ -423,7 +424,9 @@ function observerNotify(){
                     var no = JSON.parse(mut.addedNodes[0].dataset.gt);
                     if(no.notif_type == "feedback_reaction_generic"){
                         //check the reaction type by looking at the image
-                        var img = mut.addedNodes[0].getElementsByTagName('img')[1];
+                        
+                        //var img = mut.addedNodes[0].getElementsByTagName('img')[1];
+                        var img = mut.addedNodes[0].getElementsByTagName('img')[mut.addedNodes[0].getElementsByTagName('img').length-1];
                         var reaction = getReaction(img.src);
                         console.log(reaction);
                         sendNative("notification",reaction);
