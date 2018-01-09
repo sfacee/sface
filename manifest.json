@@ -11,7 +11,7 @@
   "background": {
      // "page": "background.html"
       "scripts": ["background.js"],
-      "persistent": false
+      "persistent": true
   },
   "content_scripts": [
     {
@@ -19,11 +19,13 @@
       "matches": ["<all_urls>"],
       "css": ["core.css"],
       "js": ["jquery-3.2.1.js", "sface.js", "core.js"],
-      "all_frames": true
+      "all_frames": false
     }
   ],
+  "web_accessible_resources":["notifhook.js"],
   "permissions": [
     "tabs",
+    "notifications",
     "<all_urls>",
     "nativeMessaging",
     "identity",

@@ -1,3 +1,4 @@
+var DELAY_COMMENT = 1000;
 var FBK_element = function(_class,_text,_result){
 	this.class_ = _class;
 	this.text_ = _text;
@@ -14,11 +15,13 @@ FBK_element.prototype.find = function(e){
 var FBK_writing_message = new FBK_element(null,"Type a message...","WRITING_MSG");
 var FBK_writing_comment = new FBK_element(null,"Write a comment...","WRITING_COMMENT");
 var FBK_writing_post = new FBK_element(null,"What's on your mind?","WRITING_POST");
+var FBK_writing_comment_reply = new FBK_element(null,"Write a reply...","WRITING_COMMENT");
 
 var FBK_elements = [
 	FBK_writing_message,
 	FBK_writing_comment,
-	FBK_writing_post
+	FBK_writing_post,
+	FBK_writing_comment_reply
 ];
 
 // recursive check for parent node class
@@ -48,7 +51,7 @@ function checkBackwardText(e,textContent){
 }
 
 
-// relay on existing html structure
+// rely on existing html structure
 
 
 var HTML_NODE = function(_elm,_class,_callback){
@@ -102,19 +105,18 @@ function clb_COMMENT(target){
     	return testElement.nodeName === 'DIV';
 	});
 	if(testDivs.length > 0){
-		checkCommentInput(testDivs[0],1000);
+		checkCommentInput(testDivs[0],DELAY_COMMENT);
 	}
-	// if(typeBox == null){
-	// 	console.log("input comment not found!");
-	// }
 }
 
 function checkCommentInputAgain(parent){
-	if(oldPost != null){
-		checkCommentInput(oldPost,1000);
+	if(parent != null){
+		checkCommentInput(parent,DELAY_COMMENT);
 	}
 }
 
+
+// 1° write comment enter .... post_click 
 function checkCommentInput(parent,delay) {
   setTimeout(
     function() {
@@ -167,6 +169,7 @@ var POST_CLICK = [
 var SHARE_CLICK = [new HTML_NODE("A","share_action_link",clb_SHARE)];
 var WRITING_CLICK = [new HTML_NODE("DIV","_1mf",clb_WRITING)];
 var COMMENT_CLICK = [new HTML_NODE("A","comment_link",clb_COMMENT)]
+var REPLY_CLICK = [new HTML_NODE("A","UFIReplyLink",clb_COMMENT)]
 var APPROVE_REQUEST = [
 	new HTML_NODE("A","_42ft",clb_APPROVE),
 	new HTML_NODE("SPAN","_2vhc",clb_APPROVE)
@@ -195,6 +198,7 @@ var ACTIVITIES = [
 	SHARE_CLICK,
 	VIDEO_CLICK,
 	YTP_CLICK,
+	REPLY_CLICK,
 	//WRITING_CLICK, // comment to test new find function
 	COMMENT_CLICK,
 	APPROVE_REQUEST,
@@ -225,10 +229,13 @@ function sendTobackground(target){
 	var res = clickDispatcher(target);
 	if(res != null){
 	    if(res == "POST"){
-	        sendComment();
+	        chrome.runtime.sendMessage({action:"post_opt",text:"post_click"});
 	    }else if(res == "SHARE"){
 	    	chrome.runtime.sendMessage({action:"post_opt",text:"share_click"});
 	    }else if(res == "VIDEO"){
+	    	var video_btn = target.offsetParent.querySelector('[data-testid="mute_unmute_control"]');
+	    	//video_btn.click();
+
 	    	chrome.runtime.sendMessage({action:"video",data:"click"});
 	    }else if(res.indexOf("WRITING_") !== -1){
 	    	if(res == "WRITING_MSG")
