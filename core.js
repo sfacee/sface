@@ -342,6 +342,9 @@ function getReaction(src){
                 }else{
                     //check image size
                     reaction = getReactionSize(src);
+                    if(reaction != "unknown_reaction"){
+                        return reaction;
+                    }
                 }
             }
         };
