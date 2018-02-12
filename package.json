@@ -1,0 +1,24 @@
+{
+  "name": "sface",
+  "version": "1.0.0",
+  "description": "A sample WebExtension to send OSC",
+  "main": "background.js",
+  "dependencies": {
+    "bufferutil": "^3.0.2",
+    "gulp": "^3.9.0",
+    "gulp-zip": "^4.0.0",
+    "osc": "2.2.0",
+    "utf-8-validate": "^3.0.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrea Vogrig",
+  "license": "ISC",
+  "optionalDependencies": {
+    "utf-8-validate": "^3.0.3"
+  }
+}

@@ -90,13 +90,14 @@ function MouseWheelHandler(e){
     if(video_queue.length > 0){
 
         var above = checkVisible(video_queue[0], Math.round(window.innerHeight/1.1), 'above');
-        if(above && !busy){
+        if(above){
             try{
 
                 var top_video = video_queue.shift();
-                console.log("enqueue");
-                console.log(video_queue);
-                //top_video.classList.add(MOUSE_VISITED_CLASSNAME);   
+                //console.log("enqueue");
+                //console.log(video_queue);
+                top_video.classList.add(MOUSE_VISITED_CLASSNAME);   
+                top_video.classList.remove(MOUSE_VISITED_CLASSNAME);   
                 top_video.click();
                 chrome.runtime.sendMessage({action:"video",data:"click"});
                 
