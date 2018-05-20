@@ -182,7 +182,7 @@ var VIDEO_CLICK = [
 	new HTML_NODE("I","_1jto",clb_VIDEO),
 	new HTML_NODE("I","_2ipv",clb_VIDEO),//click on restart-play at the end of the video
 	new HTML_NODE("I","_5i0o",clb_VIDEO), //click on play/pause facebook video player
-	new HTML_NODE("I","_rwt",clb_VIDEO) //I think this is a general video click?
+	new HTML_NODE("I","_rwt",clb_VIDEO) // Tomer : I think this is a general video click?
 ];
 
 var YTP_CLICK = [
