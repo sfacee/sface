@@ -27,3 +27,17 @@
   background-color: #000 !important;
   outline: 10px solid #000 !important;
 }
+.bigLogo {
+	color: #ffffff;
+	font-size: 3.5em;
+	font-family: "Arial Black", Gadget, sans-serif !important;
+}
+.icon {
+	color: #ffffff;
+	font-size:1.3em;
+}
+.instructions {
+	/* background-color: #0000aa !important;
+	color: #ffffff !important; */
+	font-family: "Arial Black", Gadget, sans-serif !important;	
+}

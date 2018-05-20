@@ -81,7 +81,11 @@ chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 				sendMessageHost(msg);
 
 				initBackground();
-
+				console.log("background");
+				console.log(installation_mode);
+				if (installation_mode) {
+					changeInterface();
+				}
 			if(redirect){
 				if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
 				//facebook

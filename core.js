@@ -22,6 +22,7 @@ var tabId;
 var time;
 var first_notify = false;
 var second_notify = false;
+var installation_mode = true;
 
 function getCoords(elem) { // crossbrowser version
     var box = elem.getBoundingClientRect();
@@ -47,6 +48,9 @@ var rect = getCoords(target);
 var rectLeft = 0;
 var rectTop = 0;
 
+var lastTime = new Date().getTime();
+var timeIdle = 5*60*1000;
+var checkIdleInterval = 60*1000;
 var newsFeed;
 var distance_video = 0;
 var video_queue = [];
@@ -75,7 +79,8 @@ function MouseWheelHandler(e){
     // cross-browser wheel delta
     var e = window.event || e; // old IE support
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-
+    lastTime = new Date().getTime();
+    //console.log(lastTime);
     mouse.scroll = window.pageYOffset;
     mouse.delta = delta;
     chrome.runtime.sendMessage({action:"scroll",cursor:JSON.stringify(mouse)});
@@ -86,11 +91,11 @@ function MouseWheelHandler(e){
     //     if(test_elm){
                 
     //     }
-  
+ /*  t: commented to avoid video auto unmute
     if(video_queue.length > 0){
 
         var above = checkVisible(video_queue[0], Math.round(window.innerHeight/1.1), 'above');
-        if(above && !busy){
+           if(above && !busy){
             try{
 
                 var top_video = video_queue.shift();
@@ -116,7 +121,7 @@ function MouseWheelHandler(e){
         //     }catch(e){}
         //     return false;
         // }
-    }
+    } */
     
 
 //    return false;
@@ -131,6 +136,7 @@ document.addEventListener('mousedown', function (e) {
     var target = e.target||e.srcElement;
     var res = false;
     mouse.down = 1;
+    lastTime = new Date().getTime();
     
     if(target !== undefined){
         sendTobackground(target);
@@ -196,6 +202,11 @@ function onInit() {
     var notification = $("#notificationsCountValue");
     //var notification_popup = $("._50d1");//$("#u_0_4b"); // notification popup _50d1
 
+    if (installation_mode) {
+      changeInterface();  
+      setInterval(checkIdle, checkIdleInterval);
+
+    } 
     try{
         observer_friend_request.observe(friend[0],config);
         observer_message_request.observe(message[0],config);
@@ -203,7 +214,7 @@ function onInit() {
     }catch(e){
     }
     
-    observerNewsFeed();
+//    observerNewsFeed(); // t: commented to avoid video auto unmute
 
     //sendNative("time","");//sync between backgroud and content
 
@@ -354,7 +365,7 @@ function getReaction(src){
     return reaction;
 }
 
-
+/* t: commented to avoid video auto-unmute
 function observerNewsFeed(){
      var config_feed = {
         childList: true,
@@ -391,7 +402,7 @@ function observerNewsFeed(){
     }catch(e){
     }
 }
-
+*/
 
 function checkVisible(elm, threshold, mode) {
       if(typeof elm !== "undefined"){
@@ -524,5 +535,85 @@ $( document ).ready(function() {
     
 });
 
+function changeInterface () {
+    /// change the facebook icon:::
+    console.log("changeInterface");
+    var logo = document.getElementsByClassName("fb_logo");
+    //var logo = document.getElementsByClassName("lfloat _ohe");
+    var newLogo = document.createElement("span");
+    //newLogo.src = "feedme-logo3.png";
+    newLogo.innerHTML = "feed/me";
+    newLogo.classList.add("bigLogo");
+    //newLogo.style.color = "#ffffff";
+    //newLogo.style.fontSize = "2em";
+    //newlogo.style.font = "Times New Roman";
+    //newLogo.size = "big";
+    //newLogo.color="white";
+    //logo.(newLogo, logo);
+    //logo.replaceWith(newLogo);
+    var header1 = document.getElementsByClassName("_ihd"); //.innerHTML = "Welcome to Feed/me";
+    var header2 = document.getElementsByClassName("_3m9"); //.innerHTML = "Login to your account or click the cat.";
+    //console.log(header1.length);
+    if (header1.length>0){
+        header1[0].innerHTML = "Welcome to Feed/me";
+    }
 
+    if (header2.length>0){
+        header2[0].innerHTML = "Login to your account or click the cat to play anonymously.";
+    }
+    if (header2.length>1){
+        header2[1].innerHTML = "We only ask for your soul.";
+    }
+    //logo.replaceChild(newLogo, logo);
+    console.log(logo);
+    if (logo.length>0){
+        logo[0].parentNode.replaceChild(newLogo, logo[0]);    
+    }
 
+    var icon = document.getElementsByClassName("_19eb");
+    //console.log(icon);
+    if (icon.length>0){
+        var newIcon = document.createElement("span");
+    //newLogo.src = "feedme-logo3.png";
+
+        newIcon.innerHTML = "feed/me";
+        newIcon.classList.add("icon");
+
+        icon[0].replaceChild(newIcon, icon[0].firstChild);
+    }
+
+    var sidenav=document.getElementById("left_nav_section_nodes");
+    while (sidenav.firstChild) {
+        sidenav.removeChild(sidenav.firstChild);
+    }
+    if (sidenav){
+        var instructions = document.createElement("span");
+        instructions.classList.add("instructions");
+        instructions.innerHTML = "Interact with your newsfeed to make some music!<br/><br/>- Likes, reactions and notifications produce sound<br/><br/>- Comments are important<br/><br/>- Play videos to sample their sound into the system<br/><br/><br/>When done please log out.";
+        sidenav.appendChild(instructions);
+    }
+}
+
+function checkIdle() {
+    var time = new Date().getTime();
+    console.log(time-lastTime);
+    if (time-lastTime > timeIdle) {
+        //window.location.href=""
+        //var logoutMenu = document.getElementById("logoutMenu");
+        var logoutMenuIcon = document.getElementsByClassName("_5lxt");
+        //console.log(logoutMenuIcon[0]);
+        if (logoutMenuIcon) {
+            logoutMenuIcon[0].click();  
+            setTimeout(function clickLogout () {
+                var logoutIcon = document.getElementsByClassName("_54ni navSubmenu _6398 _64kz");
+                if (logoutIcon) {
+                    logoutIcon[0].click();        
+                }
+            }, 1000);
+        }
+        //var logoutMenu = document.getElementsByClassName("_54nf");
+        //console.log(logoutMenu[0]);
+        
+        
+    }
+}
