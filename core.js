@@ -23,6 +23,7 @@ var time;
 var first_notify = false;
 var second_notify = false;
 var installation_mode = true;
+var tabActive = true;
 
 function getCoords(elem) { // crossbrowser version
     var box = elem.getBoundingClientRect();
@@ -461,7 +462,7 @@ function observerNotify(){
 
 //listen from background messages
 chrome.runtime.onMessage.addListener(function(request, sender) {
-    //console.log(request.time);
+    
     if(request.time != null){
         var end = new Date().getTime();
         time = end - request.time;
@@ -559,7 +560,13 @@ function changeInterface () {
     }
 
     if (header2.length>0){
-        header2[0].innerHTML = "Login to your account or click the cat to play anonymously.";
+        header2[0].innerHTML = "Login to your Facebook account or click the cat to play anonymously.";
+        var images = document.getElementsByClassName("_45ks");
+        if (images.length>0){
+            var disclaimer = document.createElement("span");
+            disclaimer.innerHTML = "<big><b>Feed/me</b> doesn't collect any information whatsoever. Facebook however collects everything as usual. If you logged in to your account make sure to logout when finished.";
+            images[0].appendChild(disclaimer);
+        }
     }
     if (header2.length>1){
         header2[1].innerHTML = "We only ask for your soul.";
@@ -583,37 +590,62 @@ function changeInterface () {
     }
 
     var sidenav=document.getElementById("left_nav_section_nodes");
-    while (sidenav.firstChild) {
-        sidenav.removeChild(sidenav.firstChild);
-    }
     if (sidenav){
+        while (sidenav.firstChild) {
+            sidenav.removeChild(sidenav.firstChild);
+        }
         var instructions = document.createElement("span");
         instructions.classList.add("instructions");
-        instructions.innerHTML = "Interact with your newsfeed to make some music!<br/><br/>- Likes, reactions and notifications produce sound<br/><br/>- Comments are important<br/><br/>- Play videos to sample their sound into the system<br/><br/><br/>When done please log out.";
+        instructions.innerHTML = "Interact with your newsfeed to make some music!<br/><br/>- Likes, reactions and notifications produce sound<br/><br/>- Comments let you add more layers<br/><br/>- Play videos to sample their sound into the system";
         sidenav.appendChild(instructions);
     }
 }
 
 function checkIdle() {
-    var time = new Date().getTime();
-    console.log(time-lastTime);
-    if (time-lastTime > timeIdle) {
-        //window.location.href=""
-        //var logoutMenu = document.getElementById("logoutMenu");
-        var logoutMenuIcon = document.getElementsByClassName("_5lxt");
-        //console.log(logoutMenuIcon[0]);
-        if (logoutMenuIcon) {
-            logoutMenuIcon[0].click();  
-            setTimeout(function clickLogout () {
-                var logoutIcon = document.getElementsByClassName("_54ni navSubmenu _6398 _64kz");
-                if (logoutIcon) {
-                    logoutIcon[0].click();        
-                }
-            }, 1000);
-        }
+    if (tabActive) {
+        var time = new Date().getTime();
+        console.log(time-lastTime);
+        if (time-lastTime > timeIdle) {
+            //window.location.href=""
+            //var logoutMenu = document.getElementById("logoutMenu");
+            var logoutMenuIcon = document.getElementsByClassName("_5lxt");
+            //console.log(logoutMenuIcon[0]);
+            if (logoutMenuIcon) {
+                logoutMenuIcon[0].click();  
+                setTimeout(function clickLogout () {
+                    var logoutIcon = document.getElementsByClassName("_54ni navSubmenu _6398 _64kz");
+                    if (logoutIcon) {
+                        logoutIcon[0].click();        
+                     }
+                }, 1000);
+            }
         //var logoutMenu = document.getElementsByClassName("_54nf");
         //console.log(logoutMenu[0]);
         
         
+        }
     }
 }
+
+//window.addEventListener('focus', setActive);
+//window.addEventListener('blur', setInActive);
+window.onfocus = function () {
+    //lastTime = new Date().getTime(); 
+    tabActive = true;
+    console.log(tabActive);
+}
+window.onblur = function () {
+    tabActive = false;
+    console.log(tabActive);
+}
+
+/*
+function setActive() {
+    tabActive = true;
+    console.log(tabActive);
+}
+
+function setInActive() {
+    tabActive = false;
+    console.log(tabActive);
+}*/

@@ -25,7 +25,8 @@ var port = null;
 var defaultUrl = "https://www.facebook.com";
 var debugUrl = "chrome://extensions";
 var debug = true;
-var redirect = debug ? false : true;//redirect to facebook
+//var redirect = debug ? false : true;//redirect to facebook
+var redirect = false;
 var firstWindow = false;
 
 chrome.browserAction.setBadgeText({text: 'sface'});
@@ -81,11 +82,11 @@ chrome.tabs.onUpdated.addListener(function(id, info, tab) {
 				sendMessageHost(msg);
 
 				initBackground();
-				console.log("background");
+				/*console.log("background");
 				console.log(installation_mode);
 				if (installation_mode) {
 					changeInterface();
-				}
+				}*/
 			if(redirect){
 				if(tab.url.toLowerCase().indexOf("facebook.com") != -1){
 				//facebook
@@ -125,7 +126,7 @@ chrome.windows.onCreated.addListener(function(windowid) {
 
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-
+	console.log(request);
 	if(request.action != null){
 		if(request.action == "time"){
 			timestamp();
@@ -164,6 +165,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 				"id":"post",
 				"string":request.text
 			};
+		} else if(request.action == "run_redirect") {
+			console.log("run redirect");
+			redirect = true;
+		} else if(request.action == "stop_redirect") {
+			console.log("stop redirect");
+			redirect = false;
 		}
 		sendMessageHost(msg);
 	}

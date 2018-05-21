@@ -20,4 +20,26 @@
 var port = chrome.extension.connect({
       name: "Sface"
  });
-port.postMessage("restart");
+//port.postMessage("restart");
+
+var button = document.getElementById('goButton');
+button.onclick = function(element) {
+	//chrome.runtime.sendMessage("stop pressed");
+	var text = document.getElementById('textInput').value;
+	var status = document.getElementById('status');
+	if (text=="run") {
+		chrome.runtime.sendMessage({action: "run_redirect"}, function(response) {
+		});
+		status.innerHTML = "redirect on";
+	} else if (text=="stop") {
+		chrome.runtime.sendMessage({action: "stop_redirect"}, function(response) {
+		});
+		status.innerHTML = "redirect off";
+	} else {
+		status.innerHTML = text;
+	}
+	
+	//var status = document.getElementById('status');
+	//status.innerHTML = "stopped";
+	//console.log("stop");
+}
