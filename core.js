@@ -565,6 +565,7 @@ function changeInterface () {
         if (images.length>0){
             var disclaimer = document.createElement("span");
             disclaimer.innerHTML = "<big><b>Feed/me</b> doesn't collect any information whatsoever. Facebook however collects everything as usual. If you logged in to your account make sure to logout when finished.";
+            if (images[0].lastChild) {images[0].removeChild(images[0].lastChild)}
             images[0].appendChild(disclaimer);
         }
     }
@@ -630,7 +631,7 @@ function checkIdle() {
 //window.addEventListener('focus', setActive);
 //window.addEventListener('blur', setInActive);
 window.onfocus = function () {
-    //lastTime = new Date().getTime(); 
+    lastTime = new Date().getTime(); 
     tabActive = true;
     console.log(tabActive);
 }
