@@ -597,7 +597,7 @@ function changeInterface () {
         }
         var instructions = document.createElement("span");
         instructions.classList.add("instructions");
-        instructions.innerHTML = "Interact with your newsfeed to make some music!<br/><br/>- Likes, reactions and notifications produce sound<br/><br/>- Comments let you add more layers<br/><br/>- Play videos to sample their sound into the system";
+        instructions.innerHTML = "Interact with your newsfeed to make some music!<br/><br/>- Likes, reactions and notifications produce sound<br/><br/>- Try different reactions for different textures<br/<br/><br/>- Comments sustain the sound and let you add more layers<br/><br/>- Play videos to sample their sound into the system";
         sidenav.appendChild(instructions);
     }
 }

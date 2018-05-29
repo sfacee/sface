@@ -41,7 +41,7 @@
 	color: #ffffff !important; */
 	font-family: "Arial Black", Gadget, sans-serif !important;	
 	font-size:1.5em;
-	background-color: #bbbbbb !important;
+	/* background-color: #bbbbbb !important; */
 	animation-duration: 1000ms;
   	animation-name: tgle;
   	animation-iteration-count: infinite;
