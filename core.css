@@ -40,4 +40,30 @@
 	/* background-color: #0000aa !important;
 	color: #ffffff !important; */
 	font-family: "Arial Black", Gadget, sans-serif !important;	
+	font-size:1.5em;
+	background-color: #bbbbbb !important;
+	animation-duration: 1000ms;
+  	animation-name: tgle;
+  	animation-iteration-count: infinite;
+}
+
+@keyframes tgle {
+  0% {
+    color: red;
+  }
+
+  49.99% {
+    color: red;
+  }
+  50% {
+    color: blue;
+  }
+
+  99.99% {
+    color: blue;
+  }
+  100% {
+    color: blue;
+  }
+}
 }

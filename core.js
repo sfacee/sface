@@ -205,7 +205,7 @@ function onInit() {
 
     if (installation_mode) {
       changeInterface();  
-      setInterval(checkIdle, checkIdleInterval);
+     // setInterval(checkIdle, checkIdleInterval);
 
     } 
     try{
