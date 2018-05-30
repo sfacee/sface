@@ -22,7 +22,7 @@
       "all_frames": false
     }
   ],
-  "web_accessible_resources":["notifhook.js"],
+  "web_accessible_resources":["notifhook.js", "intro.html"],
   "permissions": [
     "tabs",
     "notifications",

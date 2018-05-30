@@ -50,7 +50,7 @@ var rectLeft = 0;
 var rectTop = 0;
 
 var lastTime = new Date().getTime();
-var timeIdle = 5*60*1000;
+var timeIdle = 2*60*1000;
 var checkIdleInterval = 60*1000;
 var newsFeed;
 var distance_video = 0;
@@ -205,7 +205,7 @@ function onInit() {
 
     if (installation_mode) {
       changeInterface();  
-     // setInterval(checkIdle, checkIdleInterval);
+      setInterval(checkIdle, checkIdleInterval);
 
     } 
     try{
@@ -603,14 +603,15 @@ function changeInterface () {
 }
 
 function checkIdle() {
-    if (tabActive) {
+   // if (tabActive) {
         var time = new Date().getTime();
         console.log(time-lastTime);
         if (time-lastTime > timeIdle) {
-            //window.location.href=""
-            //var logoutMenu = document.getElementById("logoutMenu");
+            window.location.replace("https://tonerbaluch.000webhostapp.com/");
+            //chrome.extension.getURL("intro.html");
+            /*  
             var logoutMenuIcon = document.getElementsByClassName("_5lxt");
-            //console.log(logoutMenuIcon[0]);
+            
             if (logoutMenuIcon) {
                 logoutMenuIcon[0].click();  
                 setTimeout(function clickLogout () {
@@ -619,13 +620,13 @@ function checkIdle() {
                         logoutIcon[0].click();        
                      }
                 }, 1000);
-            }
+            }*/
         //var logoutMenu = document.getElementsByClassName("_54nf");
         //console.log(logoutMenu[0]);
         
         
         }
-    }
+   // }
 }
 
 //window.addEventListener('focus', setActive);
